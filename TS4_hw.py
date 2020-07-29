@@ -24,7 +24,17 @@ def pseudo_lut(b, n):
     ##  Output bitlen can be increased to get higher precision
     b_lut = '01' + b_recint[9:]
 
-    return b_lut
+    ##  Check if 1 - bu > 0
+    gi = int(b_lut, 2) * int(b_tail, 2)
+    gc = fig_int(gi, 49)
+
+    if (gc[1] == '1'):
+        b_lutres = hw_sub(b_lut, '1', 25)
+##        print ('gc = ', gc)
+    else:
+        b_lutres = b_lut
+
+    return b_lutres
 
 def TS6_hw(a, b, n = 26, m = 9):
     a_int = float2int_C(a)
@@ -45,46 +55,52 @@ def TS6_hw(a, b, n = 26, m = 9):
     bb = b_tail + pad00
     aa = a_tail + pad00
 
+    one = bin(2 ** (n-1))[2:]
+
     e  = hw_mul(uu, bb, n)
 
-    eb = bin_inv(e)
+    ll = hw_sub(one, e, n)
 
-    ll = hw_add(bin(2 ** (n-1) )[2:], eb, n)
+##    if 'b' in ll:
+##        print ('a  = ', a)
+##        print ('b  = ', b)
+##        print ('uu = ', uu)
+##        print ('aa = ', aa)
+##        print ('bb = ', bb)
+##        print ('ll = ', ll)
 
-##    print (ll)
+    t1 = hw_add(one, ll, n)     ## 1 + ll
 
-    t1 = hw_mul(ll, ll, n)
+    t2 = hw_mul(ll, ll, n)
 
-    t2 = hw_mul(t1, t1, n)
+    t3 = hw_mul(t2, t2, n)
 
-    t3 = hw_add(t1, t2, n)
+    t4 = hw_add(t2, t3, n)
 
-    t4 = hw_add(bin(2 ** (n-1) )[2:], t3, n)
+    t5 = hw_add(one, t4, n)     ## 1 + ll^2 + ll^4
 
-##    print (t4)
+    t6 = hw_mul(t1, t5, n)      ## (1 + ll)(1 + ll^2 + ll^4)
 
-    t5 = hw_mul(eb, t4, n)
+    t7 = hw_mul(aa, uu, n)
 
-    t6 = hw_mul(aa, uu, n)
+    t8 = hw_mul(t7, t6, n)
 
-    t7 = hw_mul(t6, t5, n)
-
-    if (t7[0] == '0'):
-        t7_remain = t7[1:25]
-        t7_cutoff = t7[25:]
-        if (t7_cutoff[0] == '1'):
-            t7_res = hw_add(t7_remain, '1', 24)
+    if (t8[0] == '0'):
+        t8_remain = t8[1:25]
+        t8_cutoff = t8[25:]
+        if (t8_cutoff[0] == '1'):
+            t8_res = hw_add(t8_remain, '1', 24)
         else:
-            t7_res = t7_remain
+            t8_res = t8_remain
     else:
-        t7_remain = t7[:24]
-        t7_cutoff = t7[24:]
-        if (t7_cutoff[0] == '1'):
-            t7_res = hw_add(t7_remain, '1', 24)
+        t8_remain = t8[:24]
+        t8_cutoff = t8[24:]
+        if (t8_cutoff[0] == '1'):
+            t8_res = hw_add(t8_remain, '1', 24)
         else:
-            t7_res = t7_remain
+            t8_res = t8_remain
     
-    return t7_res
+    return t8_res
 
 def TSn_fullprecision(a, b, n):
     a_int = float2int_C(a)
@@ -171,69 +187,72 @@ def print_lut(n, path):
     
     
 if __name__ == '__main__':
-    tt = 1000000
+    tt = 10000000
     ufp0, ufp1, ufp2 = 0, 0, 0
-    n = 50
+    n = 48
     m = 9
 
     ufp1_list = []
     ufp2_list = []
 
-    path = './/lut_u.txt'
-    print_lut(m, path)
+##    path = './/lut_u.txt'
+##    print_lut(m, path)
+
+    start = time.time()
 
     for i in range(tt):
         a = rand_float12()
         b = rand_float12()
 
         c = TS6_hw(a, b, n, m)
-        cc   = TSn_fullprecision(a, b, 6)
+##        cc   = TSn_fullprecision(a, b, 6)
         c_e = '1' + float2int_C(a/b)[9:]
 
         if (c == c_e):
             ufp0 += 1
-        elif (abs (int(c, 2) - int(c_e, 2)) == 1):
-            ufp1 += 1
-            ufp1_list.append ( (a, b) )
+##        elif (abs (int(c, 2) - int(c_e, 2)) == 1):
+##            ufp1 += 1
+##            ufp1_list.append ( (a, b) )
         else:
-            ufp2 += 1
-            ufp2_list.append ( (a, b) )
-            print ('c  = ', c)
-            print ('cc = ', cc)
-            print ('ce = ', c_e)
-            print ('\n')
+            ufp1 += 1
+##            ufp2_list.append ( (a, b) )
+##            print ('c  = ', c)
+##            print ('cc = ', cc)
+##            print ('ce = ', c_e)
+##            print ('\n')
+
+    finish = time.time()
+    dur = finish - start
 
     print ('n = ', n)
     print ('m = ', m)
     print ('ufp0 = ', ufp0)
     print ('ufp1 = ', ufp1)
     print ('ufp2 = ', ufp2)
-
-##    a = np.float32(1.4733914)
-##    b = np.float32(1.0105494)
+    print ('ELAPSED TIME = {du} s!\n'.format(du = dur))
 
     # err0 is regular error: (c != c_h) and (c_h == c_e)
     # err1 is precision error: (c_h != c_e)
-    err0, err1 = 0, 0
-
-    for per in ufp1_list:
-        a, b = per
-        
-        c = TS6_hw(a, b, n, m)    
-        c_h = TSn_fullprecision(a, b, 6)
-
-        c_int = '0' + '01111111' + c[1:]
-        c_e = '1' + float2int_C(a/b)[9:]
-
-        if (c_e != c_h):
-            err1 += 1
-        else:
-            if (c != c_h):
-                err0 += 1
-
-    print ('\n')
-    print ('err0 = ', err0)
-    print ('err1 = ', err1)
+##    err0, err1 = 0, 0
+##
+##    for per in ufp1_list:
+##        a, b = per
+##        
+##        c = TS6_hw(a, b, n, m)    
+##        c_h = TSn_fullprecision(a, b, 6)
+##
+##        c_int = '0' + '01111111' + c[1:]
+##        c_e = '1' + float2int_C(a/b)[9:]
+##
+##        if (c_e != c_h):
+##            err1 += 1
+##        else:
+##            if (c != c_h):
+##                err0 += 1
+##
+##    print ('\n')
+##    print ('err0 = ', err0)
+##    print ('err1 = ', err1)
     
 
     
