@@ -1,3 +1,5 @@
+#! /usr/bin python3 
+
 from float2int import *
 from hwi import *
 
@@ -191,7 +193,7 @@ def print_lut(n, path):
     
     
 if __name__ == '__main__':
-    tt = 10000
+    tt = 100000000
     ufp0, ufp1, ufp2 = 0, 0, 0
     n = 50
     m = 9
