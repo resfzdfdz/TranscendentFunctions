@@ -55,19 +55,12 @@ def TS6_hw(a, b, n = 26, m = 9):
     bb = b_tail + pad00
     aa = a_tail + pad00
 
+    ##  Calculation Step
     one = bin(2 ** (n-1))[2:]
 
     e  = hw_mul(uu, bb, n)
 
     ll = hw_sub(one, e, n)
-
-##    if 'b' in ll:
-##        print ('a  = ', a)
-##        print ('b  = ', b)
-##        print ('uu = ', uu)
-##        print ('aa = ', aa)
-##        print ('bb = ', bb)
-##        print ('ll = ', ll)
 
     t1 = hw_add(one, ll, n)     ## 1 + ll
 
@@ -85,18 +78,26 @@ def TS6_hw(a, b, n = 26, m = 9):
 
     t8 = hw_mul(t7, t6, n)
 
+##    print ('t8 = ', t8)
+
     if (t8[0] == '0'):
         t8_remain = t8[1:25]
         t8_cutoff = t8[25:]
         if (t8_cutoff[0] == '1'):
-            t8_res = hw_add(t8_remain, '1', 24)
+            if (t8_remain == (24 * '1') ):
+                t8_res = '1' + 23 * '0'
+            else:
+                t8_res = hw_add(t8_remain, '1', 24)
         else:
             t8_res = t8_remain
     else:
         t8_remain = t8[:24]
         t8_cutoff = t8[24:]
         if (t8_cutoff[0] == '1'):
-            t8_res = hw_add(t8_remain, '1', 24)
+            if (t8_remain == (24 * '1') ):
+                t8_res = '1' + 23 * '0'
+            else:
+                t8_res = hw_add(t8_remain, '1', 24)
         else:
             t8_res = t8_remain
     
@@ -147,7 +148,10 @@ def TSn_fullprecision(a, b, n):
     h1_cutoff = h1[24:]
 
     if (h1_cutoff[0] == '1'):
-        tails = hw_add(h1_remain, '1', 24)
+        if (h1_remain == (24 * '1') ):
+            tails = '1' + 23 * '0'
+        else:
+            tails = hw_add(h1_remain, '1', 24)
     else:
         tails = h1_remain
 
@@ -187,9 +191,9 @@ def print_lut(n, path):
     
     
 if __name__ == '__main__':
-    tt = 10000000
+    tt = 100000000
     ufp0, ufp1, ufp2 = 0, 0, 0
-    n = 48
+    n = 50
     m = 9
 
     ufp1_list = []
@@ -205,7 +209,7 @@ if __name__ == '__main__':
         b = rand_float12()
 
         c = TS6_hw(a, b, n, m)
-##        cc   = TSn_fullprecision(a, b, 6)
+##        c   = TSn_fullprecision(a, b, 6)
         c_e = '1' + float2int_C(a/b)[9:]
 
         if (c == c_e):
@@ -215,11 +219,7 @@ if __name__ == '__main__':
 ##            ufp1_list.append ( (a, b) )
         else:
             ufp1 += 1
-##            ufp2_list.append ( (a, b) )
-##            print ('c  = ', c)
-##            print ('cc = ', cc)
-##            print ('ce = ', c_e)
-##            print ('\n')
+            ufp1_list.append( (a, b) )
 
     finish = time.time()
     dur = finish - start

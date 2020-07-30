@@ -46,6 +46,16 @@ def hw_add(a, b, n = 26):
 
     return c
 
+def hw_sub(a, b, n):
+    ai = int(a, 2)
+    bi = int(b, 2)
+
+    ci = ai - bi
+
+    c = fig_int(ci, n)
+
+    return c
+
 def hw_mul(a, b, n = 26):
     assert len(a) == n, 'Data a Length Error'
     assert len(b) == n, 'Data b Length Error'
@@ -59,14 +69,6 @@ def hw_mul(a, b, n = 26):
     c_remain = c_align[1:n+1]
     c_cutoff = c_align[n+1:]
 
-##    avg = '1' + (n-2) * '0'
-##
-##    if (c_cutoff == avg):
-##        if (c_remain[-1] == '1'):
-##            c_res = hw_add(c_remain, '1', n)
-##        else:
-##            c_res = c_remain
-##    else:
     if (c_cutoff[0] == '1'):
         c_res = hw_add(c_remain, '1', n)
     else:
