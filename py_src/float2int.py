@@ -4,7 +4,7 @@ import random
 import time
 
 ll = cdll.LoadLibrary
-lib = ll('.//..//lib//cdll.dll')
+lib = ll('.//..//lib//cdll.so')
 lib.getFloatBin.restype = c_uint32
 lib.getBinFloat.restype = c_float
 lib.reciprocal.restype = c_float
