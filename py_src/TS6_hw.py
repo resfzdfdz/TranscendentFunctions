@@ -193,7 +193,7 @@ def print_lut(n, path):
     
     
 if __name__ == '__main__':
-    tt = 100000000
+    tt = 2 * (10 ** 9)
     ufp0, ufp1, ufp2 = 0, 0, 0
     n = 50
     m = 9
@@ -210,8 +210,8 @@ if __name__ == '__main__':
         a = rand_float12()
         b = rand_float12()
 
-        c = TS6_hw(a, b, n, m)
-##        c   = TSn_fullprecision(a, b, 6)
+##        c = TS6_hw(a, b, n, m)
+        c   = TSn_fullprecision(a, b, 6)
         c_e = '1' + float2int_C(a/b)[9:]
 
         if (c == c_e):
