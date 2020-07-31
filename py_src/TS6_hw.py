@@ -1,5 +1,3 @@
-#! /usr/bin python3 
-
 from float2int import *
 from hwi import *
 
@@ -38,7 +36,7 @@ def pseudo_lut(b, n):
 
     return b_lutres
 
-def TS6_hw(a, b, n = 26, m = 9):
+def TS6_hw(a, b, n = 50, m = 9):
     a_int = float2int_C(a)
     b_int = float2int_C(b)
 
@@ -64,6 +62,8 @@ def TS6_hw(a, b, n = 26, m = 9):
 
     ll = hw_sub(one, e, n)
 
+##    print ('ll = ', ll)
+
     t1 = hw_add(one, ll, n)     ## 1 + ll
 
     t2 = hw_mul(ll, ll, n)
@@ -80,32 +80,144 @@ def TS6_hw(a, b, n = 26, m = 9):
 
     t8 = hw_mul(t7, t6, n)
 
+    final = t8
 ##    print ('t8 = ', t8)
 
-    if (t8[0] == '0'):
-        t8_remain = t8[1:25]
-        t8_cutoff = t8[25:]
-        if (t8_cutoff[0] == '1'):
-            if (t8_remain == (24 * '1') ):
-                t8_res = '1' + 23 * '0'
+    if (final[0] == '0'):
+        final_remain = final[1:25]
+        final_cutoff = final[25:]
+        if (final_cutoff[0] == '1'):
+            if (final_remain == (24 * '1') ):
+                final_res = '1' + 23 * '0'
             else:
-                t8_res = hw_add(t8_remain, '1', 24)
+                final_res = hw_add(final_remain, '1', 24)
         else:
-            t8_res = t8_remain
+            final_res = final_remain
     else:
-        t8_remain = t8[:24]
-        t8_cutoff = t8[24:]
-        if (t8_cutoff[0] == '1'):
-            if (t8_remain == (24 * '1') ):
-                t8_res = '1' + 23 * '0'
+        final_remain = final[:24]
+        final_cutoff = final[24:]
+        if (final_cutoff[0] == '1'):
+            if (final_remain == (24 * '1') ):
+                final_res = '1' + 23 * '0'
             else:
-                t8_res = hw_add(t8_remain, '1', 24)
+                final_res = hw_add(final_remain, '1', 24)
         else:
-            t8_res = t8_remain
-    
-    return t8_res
+            final_res = final_remain
 
-def TSn_fullprecision(a, b, n):
+    A = int(a_tail, 2)
+    B = int(b_tail, 2)
+    C = int(final_res, 2)
+
+    if (A > B):
+        A1 = A << 23
+    else:
+        A1 = A << 24
+
+    D1 = B * C - A1
+    D2 = A1 - B * C
+
+    if ( B < (D1 << 1) ):
+        C_new = C - 1
+    elif ( B < (D2 << 1) ):
+        C_new = C + 1
+    else:
+        C_new = C
+
+    final_res = fig_int(C_new, 24)
+    
+    return final_res
+
+
+def TS6_addformular(a, b, n = 50, m = 9):
+    a_int = float2int_C(a)
+    b_int = float2int_C(b)
+
+    a_tail = '1' + a_int[9:]
+    a_exp  = a_int[1:9]
+    a_sig  = a_int[0]
+
+    b_tail = '1' + b_int[9:]
+    b_exp  = b_int[1:9]
+    b_sig  = b_int[0]
+
+##    n = 50
+    pad00 = (n - 24) * '0'
+    
+    uu = pseudo_lut(b, m) + (n - 25) * '0'
+    bb = b_tail + pad00
+    aa = a_tail + pad00
+
+    ##  Calculation Step
+    one = bin(2 ** (n-1))[2:]
+
+    e  = hw_mul(uu, bb, n)
+
+    ll = hw_sub(one, e, n)
+    l2 = hw_mul(ll, ll, n)
+    l3 = hw_mul(l2, ll, n)
+    l4 = hw_mul(l2, l2, n)
+    l5 = hw_mul(l2, l3, n)
+
+    au = hw_mul(aa, uu, n)
+
+    term1 = hw_mul(au, ll, n)
+    term2 = hw_mul(au, l2, n)
+    term3 = hw_mul(au, l3, n)
+    term4 = hw_mul(au, l4, n)
+    term5 = hw_mul(au, l5, n)
+
+    a1 = hw_add(au, term1, n)
+    a2 = hw_add(term2, term3, n)
+    a3 = hw_add(term4, term5, n)
+    a4 = hw_add(a2, a3, n)
+    a5 = hw_add(a1, a4, n)
+
+    final = a5
+
+##    print ('ll     = ', ll)
+##    print ('l2     = ', l2)
+##    print ('l3     = ', l3)
+##    print ('l4     = ', l4)
+##    print ('l5     = ', l5)
+##    print ('term1  = ', term1)
+##    print ('term2  = ', term2)
+##    print ('term3  = ', term3)
+##    print ('term4  = ', term4)
+##    print ('term5  = ', term5)
+##    print ('au     = ', au)
+
+    if (final[0] == '0'):
+        final_res = final[1:25]
+    else:
+        final_res = final[:24]
+
+    final_res = fig_int(C, 24)
+
+##    if (final[0] == '0'):
+##        final_remain = final[1:25]
+##        final_cutoff = final[25:]
+##        if (final_cutoff[0] == '1'):
+##            if (final_remain == (24 * '1') ):
+##                final_res = '1' + 23 * '0'
+##            else:
+##                final_res = hw_add(final_remain, '1', 24)
+##        else:
+##            final_res = final_remain
+##    else:
+##        final_remain = final[:24]
+##        final_cutoff = final[24:]
+##        if (final_cutoff[0] == '1'):
+##            if (final_remain == (24 * '1') ):
+##                final_res = '1' + 23 * '0'
+##            else:
+##                final_res = hw_add(final_remain, '1', 24)
+##        else:
+##            final_res = final_remain
+    
+    return final_res    
+    
+
+def TSn_fullprecision(a, b, n, visible = 'no'):
     a_int = float2int_C(a)
     b_int = float2int_C(b)
 
@@ -126,18 +238,41 @@ def TSn_fullprecision(a, b, n):
     U = int(uu, 2)
 
 ##    n = 6
-    index = 50 * n
+    bitlen = 50
+    
+    index = bitlen * n
 
     E = B * U
     L = 2 ** 50 - E
 
     TS_sum = 0
     for i in range(n):
-        TS_sum += (2 ** (50 * i)) * (L ** (n - 1 - i))
+        term = (2 ** (bitlen * (n - 1 - i) )) * (L ** i)
+        TS_sum += term
 
-    H = TS_sum * (A * U)
+        term_bin = fig_int(term, bitlen * (n-1) + 1)
 
-##    print ('H = ', bin(H))
+        if (visible == 'yes'):
+            print ('term {ie} = '.format(ie = i), term_bin)
+
+    AU = A * U
+
+    if (visible == 'yes'):
+        print ('AU     = ', fig_int(AU, bitlen)[:24], ' ', fig_int(AU, bitlen)[24:] )
+##        print ('\n')
+
+    H = TS_sum * AU
+
+##    print ('H      = ', bin(H)[2:])
+
+    tt1 = 2 ** 50 + L   ## 1 + lambda
+    tt2 = 2 ** 200 + 2 ** 100 * L * L + L ** 4  ## 1 + l^2 + l^4
+    tt3 = AU * tt1
+    
+##    print ('\n')
+##    print ('ll_1   = ', bin(tt1)[2:][:24], ' ', bin(tt1)[2:][24:] )
+##    print ('ll_2   = ', bin(tt2)[2:][:24], ' ', bin(tt2)[2:][24:]  )
+##    print ('all1   = ', bin(tt3)[2:][:24], ' ', bin(tt3)[2:][24:]  )
 
     hstr = bin(H)[2:][:28]
 
@@ -193,9 +328,9 @@ def print_lut(n, path):
     
     
 if __name__ == '__main__':
-    tt = 2 * (10 ** 9)
-    ufp0, ufp1, ufp2 = 0, 0, 0
-    n = 50
+    tt = 1602 * 2 ** 20
+    ufp0, ufp1, ufpm1, ufp2 = 0, 0, 0, 0
+    n = 28
     m = 9
 
     ufp1_list = []
@@ -206,22 +341,29 @@ if __name__ == '__main__':
 
     start = time.time()
 
+    a_tail = 0
     for i in range(tt):
         a = rand_float12()
         b = rand_float12()
 
-##        c = TS6_hw(a, b, n, m)
-        c   = TSn_fullprecision(a, b, 6)
+        c = TS6_hw(a, b, n, m)
+##        c = TS6_addformular(a, b, n, m)
+##        c   = TSn_fullprecision(a, b, 6)
         c_e = '1' + float2int_C(a/b)[9:]
 
         if (c == c_e):
             ufp0 += 1
-##        elif (abs (int(c, 2) - int(c_e, 2)) == 1):
-##            ufp1 += 1
-##            ufp1_list.append ( (a, b) )
-        else:
+        elif ( (int(c, 2) - int(c_e, 2)) == 1):
             ufp1 += 1
-            ufp1_list.append( (a, b) )
+            ufp1_list.append ( (a, b) )
+        elif ( (int(c_e, 2) - int(c, 2)) == 1):
+            ufpm1 += 1
+        else:
+            ufp2 += 1
+            ufp2_list.append( (a, b) )
+
+
+        a_tail += 1
 
     finish = time.time()
     dur = finish - start
@@ -230,6 +372,7 @@ if __name__ == '__main__':
     print ('m = ', m)
     print ('ufp0 = ', ufp0)
     print ('ufp1 = ', ufp1)
+    print ('ufpm1 = ', ufpm1)
     print ('ufp2 = ', ufp2)
     print ('ELAPSED TIME = {du} s!\n'.format(du = dur))
 
@@ -241,7 +384,7 @@ if __name__ == '__main__':
 ##        a, b = per
 ##        
 ##        c = TS6_hw(a, b, n, m)    
-##        c_h = TSn_fullprecision(a, b, 6)
+##        c_h = TSn_fullprecision(a, b, 6, 'no')
 ##
 ##        c_int = '0' + '01111111' + c[1:]
 ##        c_e = '1' + float2int_C(a/b)[9:]
@@ -252,10 +395,37 @@ if __name__ == '__main__':
 ##            if (c != c_h):
 ##                err0 += 1
 ##
+####                print ('c      = ', c)
+####                print ('ce     = ', c_e)
+####                print ('\n')
+##
 ##    print ('\n')
 ##    print ('err0 = ', err0)
 ##    print ('err1 = ', err1)
-    
 
+
+##    a = np.float32(1.697193)
+##    b = np.float32(1.7881137)
+##
+##    c  = TS6_hw(a, b, n, m)
+##    cc = TSn_fullprecision(a, b, 6, 'no')
+##    ce = '1' + float2int_C(a/b)[9:]
+
+##    u1 = [(1.6176984, 1.6776711), (1.8897705, 1.5616603)]
+##
+##    for per in u1:
+##        a = np.float32(per[0])
+##        b = np.float32(per[1])
+##        
+##        c  = TS6_hw(a, b, n, m)
+##        c1 = TS6_addformular(a, b, n, m)
+##        cc = TSn_fullprecision(a, b, 6, 'yes')
+##        ce = '1' + float2int_C(a/b)[9:]
+##
+##        print ('c  = ', c)
+##        print ('c1 = ', c1)
+##        print ('cc = ', cc)
+##        print ('ce = ', ce)
+##        print ('\n')
     
 
