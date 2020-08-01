@@ -69,11 +69,11 @@ def hw_mul(a, b, n = 26):
     c_remain = c_align[1:n+1]
     c_cutoff = c_align[n+1:]
 
-    if (c_cutoff[0] == '1'):
-        c_res = hw_add(c_remain, '1', n)
-    else:
-        c_res = c_remain
+#    if (c_cutoff[0] == '1'):
+#        c_res = hw_add(c_remain, '1', n)
+#    else:
+#        c_res = c_remain
 
-    return c_res
+    return c_remain
 
 

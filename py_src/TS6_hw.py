@@ -341,7 +341,7 @@ if __name__ == '__main__':
 
     start = time.time()
 
-    a_tail = 0
+#    a_tail = 0
     for i in range(tt):
         a = rand_float12()
         b = rand_float12()
@@ -363,7 +363,7 @@ if __name__ == '__main__':
             ufp2_list.append( (a, b) )
 
 
-        a_tail += 1
+#        a_tail += 1
 
     finish = time.time()
     dur = finish - start
