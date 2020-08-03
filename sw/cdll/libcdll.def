@@ -1,0 +1,11 @@
+EXPORTS
+    FastPow @1
+    HelloWorld @2
+    TaylorSeries @3
+    fdiv @4
+    fmul @5
+    getBinFloat @6
+    getFloatBin @7
+    power @8
+    reciprocal @9
+    test_mul @10
