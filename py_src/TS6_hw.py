@@ -1,5 +1,6 @@
 from float2int import *
 from hwi import *
+from sv_gen import *
 
 def pseudo_lut(b, n):
     b1 = np.float32(b)
@@ -36,7 +37,76 @@ def pseudo_lut(b, n):
 
     return b_lutres
 
-def TS6_hw(a, b, n = 50, m = 9):
+def Goldschmidt_hw(a, b, n = 28, m = 6):
+    '''Hardware implementation of Goldschmidt float division'''
+
+    ##  Float --> int
+    a_int = float2int_C(a)
+    b_int = float2int_C(b)
+
+    a_tail = '1' + a_int[9:]
+    a_exp  = a_int[1:9]
+    a_sig  = a_int[0]
+
+    b_tail = '1' + b_int[9:]
+    b_exp  = b_int[1:9]
+    b_sig  = b_int[0]
+
+    pad00 = (n - 24) * '0'
+    
+    uu = pseudo_lut(b, m) + (n - 25) * '0'
+    bb = b_tail + pad00
+    aa = a_tail + pad00
+
+    ##  Calculation Step
+    one = bin(2 ** (n-1))[2:]
+
+    yi = hw_mul(bb, uu, n)
+    xi = hw_mul(aa, uu, n)
+
+    for i in range(3):
+        ri = bin_inv(yi)
+        yi = hw_mul(yi, ri, n)
+        xi = hw_mul(xi, ri, n)
+        
+    ##  Final Cutoff Processing
+    final = xi
+
+    if (final[0] == '0'):
+        final_res = final[1:25]
+    else:
+        final_res = final[:24]
+
+    A = int(a_tail, 2)
+    B = int(b_tail, 2)
+    C = int(final_res, 2)
+
+    if (A > B):
+        A1 = A << 23
+    else:
+        A1 = A << 24
+
+    D1 = B * C - A1
+    D2 = A1 - B * C
+
+    if ( B < (D1 << 1) ):
+        C_new = C - 1
+    elif ( B < (D2 << 1) ):
+        C_new = C + 1
+    else:
+        C_new = C
+
+    final_res = fig_int(C_new, 24)
+
+    if ( len(final_res) == 25):
+        final_res = final_res[:24]
+    
+    return final_res
+
+def TS6_hw(a, b, n = 28, m = 6):
+    '''Hardware implementation of 6 order Taylor Series float division'''
+    
+    ##  Float --> int
     a_int = float2int_C(a)
     b_int = float2int_C(b)
 
@@ -62,8 +132,6 @@ def TS6_hw(a, b, n = 50, m = 9):
 
     ll = hw_sub(one, e, n)
 
-##    print ('ll = ', ll)
-
     t1 = hw_add(one, ll, n)     ## 1 + ll
 
     t2 = hw_mul(ll, ll, n)
@@ -79,34 +147,15 @@ def TS6_hw(a, b, n = 50, m = 9):
     t7 = hw_mul(aa, uu, n)
 
     t8 = hw_mul(t7, t6, n)
+    ##  Calculation Stop
 
+    ##  Final Cutoff Processing
     final = t8
-##    print ('t8 = ', t8)
 
     if (final[0] == '0'):
         final_res = final[1:25]
     else:
         final_res = final[:24]
-##    if (final[0] == '0'):
-##        final_remain = final[1:25]
-##        final_cutoff = final[25:]
-##        if (final_cutoff[0] == '1'):
-##            if (final_remain == (24 * '1') ):
-##                final_res = '1' + 23 * '0'
-##            else:
-##                final_res = hw_add(final_remain, '1', 24)
-##        else:
-##            final_res = final_remain
-##    else:
-##        final_remain = final[:24]
-##        final_cutoff = final[24:]
-##        if (final_cutoff[0] == '1'):
-##            if (final_remain == (24 * '1') ):
-##                final_res = '1' + 23 * '0'
-##            else:
-##                final_res = hw_add(final_remain, '1', 24)
-##        else:
-##            final_res = final_remain
 
     A = int(a_tail, 2)
     B = int(b_tail, 2)
@@ -213,12 +262,6 @@ def TSn_fullprecision(a, b, n, visible = 'no'):
     
     
     return tails
-    
-
-def rand_float12():
-    a = np.float32(random.uniform(0.5, 1))
-    b = np.float32(2 * a)
-    return b
 
 
 def print_lut(n, path):
@@ -235,37 +278,47 @@ def print_lut(n, path):
         lut_u = pseudo_lut(hh, n)
 
         wr_str = '\t\t{i}\'b'.format(i = bitcnt) + bitstr + \
-                 ': lut_u = {j}\'b'.format(j = 24) \
+                 ': lut_div = {j}\'b'.format(j = 24) \
                  + lut_u[1:] + ';\n'
 
         fp.write(wr_str)
 
-    fp.close()
+    print ('LUT Generation Success!')
 
-    return -1
+    fp.close()  
     
+
+def rand_float12():
+    a = np.float32(random.uniform(0.5, 1))
+    b = np.float32(2 * a)
+    return b
     
 if __name__ == '__main__':
-    tt = 2 ** 23
+    tt = 2 ** 25
     ufp0, ufp1, ufpm1, ufp2 = 0, 0, 0, 0
     n = 28
-    m = 9
+    m = 6
 
     ufp1_list = []
     ufp2_list = []
+    print ('Hardware Simulation Start!')
+    print ('Test Pattern Num = {tp} \n'.format(tp = tt))
 
-##    path = './/lut_u.txt'
-##    print_lut(m, path)
+    print ('Calculating LookUp-Table:')
+    module_name = 'LutDiv'
+    path = './/{mn}.sv'.format(mn = module_name)
+    path_lut = './/lut_u.txt'
+    print_lut(m, path_lut)
+    build_sv(path, path_lut, module_name, m)    
 
     start = time.time()
 
     for i in range(tt):
         a = rand_float12()
-##        b = a
         b = rand_float12()
 
-        c = TS6_hw(a, b, n, m)
-##        c = TS6_addformular(a, b, n, m)
+##        c = TS6_hw(a, b, n, m)
+        c = Goldschmidt_hw(a, b, n, m)
 ##        c   = TSn_fullprecision(a, b, 6)
         c_e = '1' + float2int_C(a/b)[9:]
 
@@ -284,12 +337,16 @@ if __name__ == '__main__':
     finish = time.time()
     dur = finish - start
 
-    print ('n = ', n)
-    print ('m = ', m)
-    print ('ufp0 = ', ufp0)
-    print ('ufp1 = ', ufp1)
-    print ('ufpm1 = ', ufpm1)
-    print ('ufp2 = ', ufp2)
+    print ('Hardware Parameters:')
+    print ('n =', n)
+    print ('m = {mm} \n'.format(mm = m))
+
+    print ('Simulation Errors:')
+    print ('ufp0  =', ufp0)
+    print ('ufp1  =', ufp1)
+    print ('ufpm1 =', ufpm1)
+    print ('ufp2  = {u2} \n'.format(u2 = ufp2) )
+    
     print ('ELAPSED TIME = {du} s!\n'.format(du = dur))
 
     fp = open('Non-Equal.txt', 'w')
