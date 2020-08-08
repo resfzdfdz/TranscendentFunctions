@@ -83,7 +83,7 @@ def TS4_sqrt_hw(b, n = 28, m = 9):
     one = '01' + (n - 2) * '0'
     thr = '11' + (n - 2) * '0'
 
-    for i in range(3):
+    for i in range(2):
         t1 = hw_sqrt_mul(Z, Z, n)
         t2 = hw_sqrt_mul(t1, B, n)
         t3 = hw_sub(thr, t2, n)
@@ -151,9 +151,9 @@ def rand_float14():
     return b
 
 if __name__ == '__main__':
-    tt = 2 ** 20
+    tt = 100 * 2 ** 20
     ufp0, ufp1, ufpm1, ufp2 = 0, 0, 0, 0
-    n, m = 28, 6
+    n, m = 28, 8
 
     ufp1_list, ufp2_list = [], []
     
