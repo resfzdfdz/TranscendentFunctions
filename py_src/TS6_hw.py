@@ -77,29 +77,29 @@ def Goldschmidt_hw(a, b, n = 28, m = 6):
     else:
         final_res = final[:24]
 
-    A = int(a_tail, 2)
-    B = int(b_tail, 2)
-    C = int(final_res, 2)
-
-    if (A > B):
-        A1 = A << 23
-    else:
-        A1 = A << 24
-
-    D1 = B * C - A1
-    D2 = A1 - B * C
-
-    if ( B < (D1 << 1) ):
-        C_new = C - 1
-    elif ( B < (D2 << 1) ):
-        C_new = C + 1
-    else:
-        C_new = C
-
-    final_res = fig_int(C_new, 24)
-
-    if ( len(final_res) == 25):
-        final_res = final_res[:24]
+##    A = int(a_tail, 2)
+##    B = int(b_tail, 2)
+##    C = int(final_res, 2)
+##
+##    if (A > B):
+##        A1 = A << 23
+##    else:
+##        A1 = A << 24
+##
+##    D1 = B * C - A1
+##    D2 = A1 - B * C
+##
+##    if ( B < (D1 << 1) ):
+##        C_new = C - 1
+##    elif ( B < (D2 << 1) ):
+##        C_new = C + 1
+##    else:
+##        C_new = C
+##
+##    final_res = fig_int(C_new, 24)
+##
+##    if ( len(final_res) == 25):
+##        final_res = final_res[:24]
     
     return final_res
 
@@ -294,7 +294,7 @@ def rand_float12():
     return b
     
 if __name__ == '__main__':
-    tt = 2 ** 25
+    tt = 2 ** 20
     ufp0, ufp1, ufpm1, ufp2 = 0, 0, 0, 0
     n = 28
     m = 6
@@ -306,7 +306,7 @@ if __name__ == '__main__':
 
     print ('Calculating LookUp-Table:')
     module_name = 'LutDiv'
-    path = './/{mn}.sv'.format(mn = module_name)
+    path = './/..//..//hw//{mn}.sv'.format(mn = module_name)
     path_lut = './/lut_u.txt'
     print_lut(m, path_lut)
     build_sv(path, path_lut, module_name, m)    
@@ -317,8 +317,8 @@ if __name__ == '__main__':
         a = rand_float12()
         b = rand_float12()
 
-##        c = TS6_hw(a, b, n, m)
-        c = Goldschmidt_hw(a, b, n, m)
+        c = TS6_hw(a, b, n, m)
+##        c = Goldschmidt_hw(a, b, n, m)
 ##        c   = TSn_fullprecision(a, b, 6)
         c_e = '1' + float2int_C(a/b)[9:]
 
@@ -396,26 +396,6 @@ if __name__ == '__main__':
 
 ##    a = np.float32(1.697193)
 ##    b = np.float32(1.7881137)
-##
-##    c  = TS6_hw(a, b, n, m)
-##    cc = TSn_fullprecision(a, b, 6, 'no')
-##    ce = '1' + float2int_C(a/b)[9:]
 
-##    u1 = [(1.6176984, 1.6776711), (1.8897705, 1.5616603)]
-##
-##    for per in u1:
-##        a = np.float32(per[0])
-##        b = np.float32(per[1])
-##        
-##        c  = TS6_hw(a, b, n, m)
-##        c1 = TS6_addformular(a, b, n, m)
-##        cc = TSn_fullprecision(a, b, 6, 'yes')
-##        ce = '1' + float2int_C(a/b)[9:]
-##
-##        print ('c  = ', c)
-##        print ('c1 = ', c1)
-##        print ('cc = ', cc)
-##        print ('ce = ', ce)
-##        print ('\n')
     
 

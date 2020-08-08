@@ -9,6 +9,26 @@ class FloatObj:
         self.exp = int(self.BinRepresent()[1:9], 2) - 127
         self.signal = int(self.BinRepresent()[0], 2)
 
+    def __eq__(self, other):
+        return self.BinRepresent() == other.BinRepresent()
+
+    def __add__(self, other):
+        return self.float32 + other.float32
+
+    def __sub__(self, other):
+        return self.float32 - other.float32
+
+    def __mul__(self, other):
+        return FloatObj(self.float32 * other.float32)
+
+    def __truediv__(self, other):
+        a = self.float32
+        b = other.float32
+        return FloatObj(a/b)
+
+    def sqrt(self):
+        return FloatObj(np.sqrt(self.float32))
+    
     def BinRepresent(self):
         return float2int_C(self.float32)
 
@@ -45,17 +65,3 @@ class FloatObj:
         int_x = int(bin_x, 2)
 
         return FloatObj(int2float_C(int_x))
-
-    def __eq__(self, other):
-        return self.BinRepresent() == other.BinRepresent()
-
-    def __mul__(self, other):
-        return FloatObj(self.float32 * other.float32)
-
-    def __truediv__(self, other):
-        a = self.float32
-        b = other.float32
-        return FloatObj(a/b)
-
-    def sqrt(self):
-        return FloatObj(np.sqrt(self.float32))

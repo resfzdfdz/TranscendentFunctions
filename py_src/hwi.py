@@ -69,10 +69,33 @@ def hw_mul(a, b, n = 26):
     c_remain = c_align[1:n+1]
     c_cutoff = c_align[n+1:]
 
-#    if (c_cutoff[0] == '1'):
-#        c_res = hw_add(c_remain, '1', n)
-#    else:
-#        c_res = c_remain
+    c_res = c_remain
+##    if (c_cutoff[0] == '1'):
+##        c_res = hw_add(c_remain, '1', n)
+##    else:
+##        c_res = c_remain
+
+    return c_res
+
+def hw_sqrt_mul(a, b, n):
+    assert len(a) == n, 'Data a Length Error'
+    assert len(b) == n, 'Data b Length Error'
+
+    a_int = int(a, 2)
+    b_int = int(b, 2)
+    c_int = a_int * b_int
+
+    c_align = fig_int(c_int, 2 * n)
+
+##    assert c_align[0:2] == '00', 'Cutoff Error!'
+
+    c_remain = c_align[2:n+2]
+    c_cutoff = c_align[n+2:]
+
+##    if (c_cutoff[0] == '1'):
+##        c_res = hw_add(c_remain, '1', n)
+##    else:
+##        c_res = c_remain
 
     return c_remain
 
