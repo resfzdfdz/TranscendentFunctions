@@ -65,6 +65,15 @@ def lut_z(b, n):
     Z = t4
 
     return Z
+
+def lut_z3(b, n):
+    Z = lut_z(b, n)
+
+    t1 = hw_sqrt_mul(Z, Z, 25)
+
+    z3= hw_sqrt_mul(t1, Z, 25)
+
+    return z3
     
 
 def TS4_sqrt_hw(b, n = 28, m = 9):
@@ -73,24 +82,36 @@ def TS4_sqrt_hw(b, n = 28, m = 9):
     ##  Float --> Extended Int
     bb = b.BinSqrtTail()
     zz = lut_z(b, m)
+    z3 = lut_z3(b, m)
 
     pad = (n - 25) * '0'
 
     B = bb + pad
     Z = zz + pad
+    Z3 = z3 + pad
 
     ##  Calculation Step 1
     one = '01' + (n - 2) * '0'
     thr = '11' + (n - 2) * '0'
 
-    for i in range(2):
-        t1 = hw_sqrt_mul(Z, Z, n)
-        t2 = hw_sqrt_mul(t1, B, n)
-        t3 = hw_sub(thr, t2, n)
-        t4 = hw_sqrt_mul(Z, t3, n)
-        Z = '0' + t4[:-1]
+    t1 = hw_add (Z, Z[1:] + '0', n)   ##  t1 = 3Z
+    t2 = hw_sqrt_mul (B, Z3, n)       ##  t2 = B * Z3                    mul1
+    t3 = hw_sub (t1, t2, n)           ##  t3 = (3Z - B * Z3)
+    t4 = '0' + t3[:-1]                ##  t4 = (1/2) * t3 ( = x1)
+    t5 = hw_sqrt_mul (B, t4, n)       ##  t5 = B * x1 ( = y1)            mul2
+    t6 = hw_sqrt_mul (t4, t5, n)      ##  t6 = t4 * t5 ( = x1 * y1)      mul3
+    t7 = hw_sub (thr, t6, n)          ##  t7 = 3 - t6 ( = 3 - x1 * y1)
+    t8 = hw_sqrt_mul (t5, t7, n)      ##  t8 = y1 * t7                   mul4
+    v = '0' + t8[:-1]                 ##  v  = (1/2) * t8
 
-    v = hw_sqrt_mul(Z, B, n)
+#    for i in range(2):
+#        t1 = hw_sqrt_mul(Z, Z, n)
+#        t2 = hw_sqrt_mul(t1, B, n)
+#        t3 = hw_sub(thr, t2, n)
+#        t4 = hw_sqrt_mul(Z, t3, n)
+#        Z = '0' + t4[:-1]
+
+#    v = hw_sqrt_mul(Z, B, n)
     r = v[:25]
 
     ##  Tuckerman Rounding Test
@@ -151,7 +172,7 @@ def rand_float14():
     return b
 
 if __name__ == '__main__':
-    tt = 100 * 2 ** 20
+    tt = 2 ** 30
     ufp0, ufp1, ufpm1, ufp2 = 0, 0, 0, 0
     n, m = 28, 8
 
