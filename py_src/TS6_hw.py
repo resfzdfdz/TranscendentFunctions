@@ -278,7 +278,7 @@ def print_lut(n, path):
         lut_u = pseudo_lut(hh, n)
 
         wr_str = '\t\t{i}\'b'.format(i = bitcnt) + bitstr + \
-                 ': lut_div = {j}\'b'.format(j = 24) \
+                 ': lut_value = {j}\'b'.format(j = 24) \
                  + lut_u[1:] + ';\n'
 
         fp.write(wr_str)
@@ -294,7 +294,7 @@ def rand_float12():
     return b
     
 if __name__ == '__main__':
-    tt = 2 ** 20
+    tt = 2 ** 10
     ufp0, ufp1, ufpm1, ufp2 = 0, 0, 0, 0
     n = 28
     m = 6
@@ -309,7 +309,7 @@ if __name__ == '__main__':
     path = './/..//..//hw//{mn}.sv'.format(mn = module_name)
     path_lut = './/lut_u.txt'
     print_lut(m, path_lut)
-    build_sv(path, path_lut, module_name, m)    
+    build_sv(path, path_lut, module_name, m - 1)    
 
     start = time.time()
 

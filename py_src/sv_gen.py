@@ -31,8 +31,8 @@ def build_sv(path, path_lut, module_name, m):
     f.writelines('(\n')    
 
 ##  Generate port
-    str_1 = '\tinput  logic [{bi}:0]  index,\n'.format(bi = m - 2)
-    str_2 = '\toutput logic [23:0] lut_div\n'
+    str_1 = '\tinput  logic [{bi}:0]  index,\n'.format(bi = m - 1)
+    str_2 = '\toutput logic [23:0] lut_value\n'
     str_3 = ');\n\n'
 
     f.write(str_1 + str_2 + str_3)
@@ -41,7 +41,7 @@ def build_sv(path, path_lut, module_name, m):
     f.write (lut_part(path_lut))
     f.write (post_lut())
 
-    print ('{mn}.sv Generation Success!\n'.format(mn = module_name) )
+    print ('{mn}.sv Generation Success!'.format(mn = module_name) )
     
     f.close()
 
