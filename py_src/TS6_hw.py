@@ -306,8 +306,8 @@ if __name__ == '__main__':
 
     print ('Calculating LookUp-Table:')
     module_name = 'LutDiv'
-    path = './/{mn}.sv'.format(mn = module_name)
-    path_lut = './/lut_u.txt'
+    path = './/luts//{mn}.sv'.format(mn = module_name)
+    path_lut = './/luts//lut_u.txt'
     print_lut(m, path_lut)
     build_sv(path, path_lut, module_name, m - 1)    
 

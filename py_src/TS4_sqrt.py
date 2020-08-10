@@ -164,12 +164,12 @@ if __name__ == '__main__':
     print ('Calculating LookUp-Table:')
     name1 = 'LutZ'
     name2 = 'LutZ3'
-    path1 = f'.//{name1}.txt'
-    path2 = f'.//{name2}.txt'
+    path1 = f'.//luts//{name1}.txt'
+    path2 = f'.//luts//{name2}.txt'
     print_lut(m, path1, path2)
 
-    ps1   = f'.//{name1}.sv'
-    ps2   = f'.//{name2}.sv'
+    ps1   = f'.//luts//{name1}.sv'
+    ps2   = f'.//luts//{name2}.sv'
     build_sv (ps1, path1, name1, m)
     build_sv (ps2, path2, name2, m)
 ##    build_sv(path, path_lut, module_name, m)    
