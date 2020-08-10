@@ -1,2 +1,2 @@
 
-python3 ./py_src/TS4_sqrt.py
+python3 ./py_src/TS6_hw.py
