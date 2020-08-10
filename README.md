@@ -1,4 +1,4 @@
-# TranscendentFunctions
+# Transcendent Functions
 Transcendent Functions simulations
 
 Already Verified Algorithms:
