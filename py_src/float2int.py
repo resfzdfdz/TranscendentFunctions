@@ -12,9 +12,33 @@ lib.fmul.restype = c_float
 lib.fdiv.restype = c_float
 lib.power.restype = c_float
 lib.TaylorSeries.restype = c_float
+lib.FloatSqrtRoot.restype = c_float
+lib.FloatSin.restype = c_float
+lib.FloatCos.restype = c_float
 
 
 ####   Use C to change numbers   ###
+def CFloatSqrtRoot(b):
+    B = c_float(b)
+    c = lib.FloatSqrtRoot(B)
+    d = np.float32(c)
+
+    return d
+
+def CFloatSin(b):
+    B = c_float(b)
+    c = lib.FloatSin(B)
+    d = np.float32(c)
+
+    return d
+
+def CFloatCos(b):
+    B = c_float(b)
+    c = lib.FloatCos(B)
+    d = np.float32(c)
+
+    return d
+
 def test_mul():
     lib.test_mul()
 
