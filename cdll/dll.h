@@ -7,11 +7,11 @@
 #define DLLIMPORT __declspec(dllimport)
 #endif
 
-DLLIMPORT float FloatSqrtRoot (float b);
+DLLIMPORT unsigned int FloatSqrtRoot (float b);
 
-DLLIMPORT float FloatSin (float b);
+DLLIMPORT unsigned int FloatSin (float b);
 
-DLLIMPORT float FloatCos (float b);
+DLLIMPORT unsigned int FloatCos (float b);
 
 DLLIMPORT unsigned int getFloatBin(float num);
 

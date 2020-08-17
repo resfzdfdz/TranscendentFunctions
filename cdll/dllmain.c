@@ -5,22 +5,26 @@
 #include <stdlib.h>
 #include <math.h>
 
-DLLIMPORT float FloatSqrtRoot (float b)
+
+DLLIMPORT unsigned int FloatSqrtRoot (float b)
 {
 	float a = sqrt(b);
-	return a;
+	unsigned int c = getFloatBin(a);
+	return c;
 }
 
-DLLIMPORT float FloatSin (float b)
+DLLIMPORT unsigned int FloatSin (float b)
 {
 	float a = sin(2 * M_PI * b);
-	return a;
+	unsigned int c = getFloatBin(a);
+	return c;
 }
 
-DLLIMPORT float FloatCos (float b)
+DLLIMPORT unsigned int FloatCos (float b)
 {
 	float a = cos(2 * M_PI * b);
-	return a;
+	unsigned int c = getFloatBin(a);
+	return c;
 }
 
 DLLIMPORT float power(float a, int n)
