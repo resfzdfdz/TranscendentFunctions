@@ -172,7 +172,7 @@ def rand_float14():
     return b
 
 if __name__ == '__main__':
-    tt = 2 ** 30
+    tt = 2 ** 26
     ufp0, ufp1, ufpm1, ufp2 = 0, 0, 0, 0
     n, m = 28, 8
 
