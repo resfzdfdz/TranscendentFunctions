@@ -1,53 +1,6 @@
 
 from FloatObject import *
-
-def lut_y(b, n):
-    b_sqrttail = b.BinSqrtTail()
-
-    b_upbound = b_sqrttail[:n] + (25 - n) * '1'
-
-    t1 = FloatObj.SqrtTail2Float(b_upbound)
-
-    t2 = t1.sqrt()
-
-    t3 = t2.BinTail()
-
-    y = '0' + t3     ## fig to 25 bit and move point
-
-    sqrtb = '0' + b.sqrt().BinTail()
-
-    if (int(y, 2) < int(sqrtb, 2) ):
-        y = hw_add(y, '1', 25)
-    else:
-        y = y
-
-##    assert (int(y, 2) >= int(sqrtb, 2)), 'Y < sqrt(B) !'
-
-    return y
-
-def lut_x(b, n):
-    B = b.BinSqrtTail()
-
-    b_upbound = B[:n] + (25 - n) * '1'
-
-    t1 = FloatObj.SqrtTail2Float(b_upbound)
-
-    t2 = FloatObj(1) / t1
-
-    if (t2.exp == -1):
-        t3 = '00' + t2.BinTail()[:23]
-    elif (t2.exp == -2):
-        t3 = '000' + t2.BinTail()[:22]
-    else:
-        print ('Exp Error!')
-        return -1
-
-    if ( (int (B, 2) * int(t3, 2)) > (2 ** 46) ):
-        X = hw_add(t3, '1', 25)
-    else:
-        X = t3
-
-    return X
+from sv_gen import *
 
 def lut_z(b, n):
     B = b.BinSqrtTail()
@@ -166,13 +119,40 @@ def TS6_sqrt_fullprecision(b):
     
     return final_res
 
+def print_lut(n, path1, path2):
+    f1 = open(path1, 'w')
+    f2 = open(path2, 'w')
+    
+    for i in range(2 ** n):
+        bitstr = fig_int(i, n)
+
+        if (bitstr[0] == '0'):
+            B = '1'  + bitstr[1:]   + (25 - n) * '1'
+        else:
+            B = '01' + bitstr[1:-1] + (25 - n) * '1'
+
+        b = FloatObj.SqrtTail2Float(B)
+
+        z  = lut_z (b, n)
+        z3 = lut_z3(b, n)
+
+        str_z  = f'\t\t{n}\'b{bitstr}:\tlut_value = 25\'b{z};\n'
+        str_z3 = f'\t\t{n}\'b{bitstr}:\tlut_value = 25\'b{z3};\n'
+
+        f1.writelines (str_z)
+        f2.writelines (str_z3)
+
+    f1.close()
+    f2.close()
+
+
 def rand_float14():
     a = np.float32(random.uniform(0.25, 1))
     b = np.float32(4 * a)
     return b
 
 if __name__ == '__main__':
-    tt = 2 ** 26
+    tt = 2 ** 10
     ufp0, ufp1, ufpm1, ufp2 = 0, 0, 0, 0
     n, m = 28, 8
 
@@ -181,11 +161,17 @@ if __name__ == '__main__':
     print ('Hardware Simulation Start!')
     print ('Test Pattern Num = {tp} \n'.format(tp = tt))
 
-##    print ('Calculating LookUp-Table:')
-##    module_name = 'LutDiv'
-##    path = './/..//..//hw//{mn}.sv'.format(mn = module_name)
-##    path_lut = './/lut_u.txt'
-##    print_lut(m, path_lut)
+    print ('Calculating LookUp-Table:')
+    name1 = 'LutZ'
+    name2 = 'LutZ3'
+    path1 = f'.//luts//{name1}.txt'
+    path2 = f'.//luts//{name2}.txt'
+    print_lut(m, path1, path2)
+
+    ps1   = f'.//luts//{name1}.sv'
+    ps2   = f'.//luts//{name2}.sv'
+    build_sv (ps1, path1, name1, m)
+    build_sv (ps2, path2, name2, m)
 ##    build_sv(path, path_lut, module_name, m)    
 
     start = time.time()
@@ -212,6 +198,7 @@ if __name__ == '__main__':
     finish = time.time()
     dur = finish - start
 
+    print ('\n')
     print ('Hardware Parameters:')
     print ('n =', n)
     print ('m = {mm} \n'.format(mm = m))

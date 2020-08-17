@@ -10,4 +10,4 @@ $(SO_PATH)/$(TARGET).so:	$(C_PATH)/$(TARGET).c
 	$(CC) $(CFLAGS) $^ -o $@
 
 clean:
-	rm -rf *~
+	rm -rf *~ *.sv *.txt
