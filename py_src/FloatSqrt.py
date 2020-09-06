@@ -177,7 +177,11 @@ if __name__ == '__main__':
     start = time.time()
 
     for i in range(tt):
-        b = FloatObj(rand_float14())
+##        b = FloatObj(rand_float14())
+        char_i = fig_int (i, 23)
+        bin_i = '01' + char_i
+##        bin_i = '1' + char_i + '0'
+        b = FloatObj.SqrtTail2Float(bin_i)
 
         c = TS4_sqrt_hw(b, n, m)
 ##        c = TS6_sqrt_fullprecision(b)
